@@ -1,0 +1,5 @@
+# Credenciales y configuración sensible
+.env
+
+# Carpeta de fotos subidas por usuarios
+fotos/
