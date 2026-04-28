@@ -92,12 +92,13 @@ if (!in_array($mimeType, $allowedMime)) {
     );
 }
 
-// --- 6. Crear carpeta destino si no existe ---
-$uploadDir = 'fotos/';
+// --- 6. Crear carpeta destino por usuario si no existe ---
+$userId    = (int)$_SESSION['user_id'];
+$uploadDir = 'fotos/user_' . $userId . '/';
 if (!is_dir($uploadDir)) {
     if (!mkdir($uploadDir, 0755, true)) {
         uploadError(
-            'No se pudo crear la carpeta de destino «fotos/».',
+            'No se pudo crear la carpeta de destino.',
             'Verifica que Apache tenga permisos de escritura en el directorio del proyecto.'
         );
     }
@@ -106,13 +107,13 @@ if (!is_dir($uploadDir)) {
 // --- 7. Verificar que la carpeta es escribible ---
 if (!is_writable($uploadDir)) {
     uploadError(
-        'La carpeta «fotos/» existe pero no tiene permisos de escritura.',
+        "La carpeta «fotos/user_{$userId}/» existe pero no tiene permisos de escritura.",
         'En el servidor ejecuta: sudo chown -R apache:apache fotos/ && sudo chmod 755 fotos/'
     );
 }
 
 // --- 8. Mover el archivo ---
-$safeName       = time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '_', $fileName);
+$safeName       = 'user_' . $userId . '_' . time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '_', $fileName);
 $targetFilePath = $uploadDir . $safeName;
 
 if (!move_uploaded_file($file['tmp_name'], $targetFilePath)) {
@@ -123,7 +124,7 @@ if (!move_uploaded_file($file['tmp_name'], $targetFilePath)) {
 }
 
 // --- 9. Guardar en base de datos ---
-$stmt = $conn->prepare("INSERT INTO fotos (nombre_archivo, ruta_archivo) VALUES (?, ?)");
+$stmt = $conn->prepare("INSERT INTO fotos (user_id, nombre_archivo, ruta_archivo) VALUES (?, ?, ?)");
 if (!$stmt) {
     // Si no se pudo preparar, borrar el archivo ya subido
     @unlink($targetFilePath);
@@ -133,7 +134,7 @@ if (!$stmt) {
     );
 }
 
-$stmt->bind_param("ss", $fileName, $targetFilePath);
+$stmt->bind_param("iss", $userId, $fileName, $targetFilePath);
 
 if (!$stmt->execute()) {
     @unlink($targetFilePath); // Limpiar archivo huérfano

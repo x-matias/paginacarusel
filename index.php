@@ -5,9 +5,13 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 require 'db_connect.php';
-$result = $conn->query("SELECT * FROM fotos ORDER BY subido_en DESC");
+$userId = (int)$_SESSION['user_id'];
+$stmt   = $conn->prepare("SELECT * FROM fotos WHERE user_id = ? ORDER BY subido_en DESC");
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
 $photos = [];
-if($result) {
+if ($result) {
     while ($row = $result->fetch_assoc()) {
         $photos[] = $row;
     }

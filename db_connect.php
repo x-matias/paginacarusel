@@ -48,13 +48,23 @@ if (!$conn->query($sql)) {
 
 // --- Paso 5: Crear tabla de fotos si no existe ---
 $sql = "CREATE TABLE IF NOT EXISTS fotos (
-    id           INT AUTO_INCREMENT PRIMARY KEY,
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    user_id        INT NOT NULL,
     nombre_archivo VARCHAR(255) NOT NULL,
     ruta_archivo   VARCHAR(255) NOT NULL,
-    subido_en    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    subido_en      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
 if (!$conn->query($sql)) {
     die("Error al crear la tabla 'fotos': " . $conn->error);
+}
+
+// --- Migración: agregar user_id si la tabla ya existía sin esa columna ---
+$checkCol = $conn->query("SHOW COLUMNS FROM fotos LIKE 'user_id'");
+if ($checkCol && $checkCol->num_rows === 0) {
+    // Añadir columna (sin NOT NULL todavía para no romper filas existentes)
+    $conn->query("ALTER TABLE fotos ADD COLUMN user_id INT NULL AFTER id");
+    $conn->query("ALTER TABLE fotos ADD CONSTRAINT fk_fotos_user FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE");
 }
 ?>
