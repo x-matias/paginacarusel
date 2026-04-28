@@ -3,3 +3,6 @@
 
 # Carpeta de fotos subidas por usuarios
 fotos/
+
+# El .env.example SÍ se incluye en git (es solo una plantilla sin datos reales)
+!.env.example

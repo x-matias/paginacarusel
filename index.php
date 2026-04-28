@@ -46,6 +46,7 @@ if($result) {
                                 <img src="<?= htmlspecialchars($photo['ruta_archivo']) ?>" alt="<?= htmlspecialchars($photo['nombre_archivo']) ?>" />
                                 <div class="image-overlay">
                                     <p class="image-title"><?= htmlspecialchars($photo['nombre_archivo']) ?></p>
+                                    <a href="delete.php?id=<?= $photo['id'] ?>" class="delete-btn" onclick="return confirm('¿Eliminar esta foto?')" title="Eliminar foto">🗑️</a>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -81,6 +82,9 @@ if($result) {
             
             <?php if(isset($_GET['status']) && $_GET['status'] == 'success'): ?>
                 <div class="alert success">¡Foto subida con éxito!</div>
+            <?php endif; ?>
+            <?php if(isset($_GET['status']) && $_GET['status'] == 'deleted'): ?>
+                <div class="alert error">Foto eliminada correctamente.</div>
             <?php endif; ?>
 
             <form action="upload.php" method="POST" enctype="multipart/form-data" class="upload-form">
