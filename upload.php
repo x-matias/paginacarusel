@@ -92,13 +92,13 @@ if (!in_array($mimeType, $allowedMime)) {
     );
 }
 
-// --- 6. Crear carpeta destino por usuario si no existe ---
+// --- 6. Carpeta destino única (fotos/) ---
 $userId    = (int)$_SESSION['user_id'];
-$uploadDir = 'fotos/user_' . $userId . '/';
+$uploadDir = 'fotos/';
 if (!is_dir($uploadDir)) {
     if (!mkdir($uploadDir, 0755, true)) {
         uploadError(
-            'No se pudo crear la carpeta de destino.',
+            'No se pudo crear la carpeta de destino «fotos/».',
             'Verifica que Apache tenga permisos de escritura en el directorio del proyecto.'
         );
     }
@@ -107,12 +107,12 @@ if (!is_dir($uploadDir)) {
 // --- 7. Verificar que la carpeta es escribible ---
 if (!is_writable($uploadDir)) {
     uploadError(
-        "La carpeta «fotos/user_{$userId}/» existe pero no tiene permisos de escritura.",
+        'La carpeta «fotos/» existe pero no tiene permisos de escritura.',
         'En el servidor ejecuta: sudo chown -R apache:apache fotos/ && sudo chmod 755 fotos/'
     );
 }
 
-// --- 8. Mover el archivo ---
+// --- 8. Mover el archivo (nombre incluye user_id para identificar al dueño) ---
 $safeName       = 'user_' . $userId . '_' . time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '_', $fileName);
 $targetFilePath = $uploadDir . $safeName;
 
